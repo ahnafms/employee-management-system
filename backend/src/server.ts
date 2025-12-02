@@ -8,15 +8,27 @@ import { openAPIRouter } from "@/api-docs/openAPIRouter";
 import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
-import { env } from "@/common/utils/envConfig";
+import AppDataSource from "./database";
+import { env } from "./common/utils/envConfig";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
 
-// Set the application to trust the reverse proxy
+//init database connection
+AppDataSource.initialize()
+  .then(() => {
+    const DB_PORT = env.DB_PORT || 5432;
+
+    logger.info(`Database connected successfully on port ${DB_PORT}`);
+  })
+  .catch((err) => {
+    console.log(err);
+    logger.error("Database connection failed", err);
+    process.exit(1);
+  });
+
 app.set("trust proxy", true);
 
-// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
