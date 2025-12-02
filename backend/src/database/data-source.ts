@@ -1,4 +1,5 @@
 import { DataSource } from "typeorm";
+import { join } from "path";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -7,9 +8,9 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: true,
+  synchronize: false,
   logging: true,
-  entities: [__dirname + "/database/entities/*.{ts,js}"],
-  migrations: [__dirname + "/database/migrations/*.{ts,js}"],
-  subscribers: [__dirname + "/database/subscribers/*.{ts,js}"],
+  entities: [join(__dirname, "/entities/*.{ts,js}")],
+  migrations: [join(__dirname, "/migrations/*.{ts,js}")],
+  subscribers: [join(__dirname, "/subscribers/*.{ts,js}")],
 });
