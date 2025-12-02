@@ -1,3 +1,4 @@
+import "@/zod-setup";
 import { env } from "@/common/utils/envConfig";
 import { app, logger } from "@/server";
 import "reflect-metadata";

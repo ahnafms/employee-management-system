@@ -11,6 +11,7 @@ import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "./common/utils/envConfig";
 import SingletonDb from "./database";
 import { authRouter } from "./api/auth/authRouter";
+import { employeeRouter } from "./api/employee/employeeRouter";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -33,6 +34,7 @@ app.use("/health-check", healthCheckRouter);
 app.use("/users", userRouter);
 
 app.use("/login", authRouter);
+app.use("/employees", employeeRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
