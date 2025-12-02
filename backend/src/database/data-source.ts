@@ -14,3 +14,23 @@ export const AppDataSource = new DataSource({
   migrations: [join(__dirname, "/migrations/*.{ts,js}")],
   subscribers: [join(__dirname, "/subscribers/*.{ts,js}")],
 });
+
+export class SingletonDb {
+  private static instance: SingletonDb;
+  private static dataSource: DataSource = AppDataSource;
+
+  public static getConnection(): DataSource {
+    if (!SingletonDb.instance) {
+      SingletonDb.instance = new SingletonDb();
+      SingletonDb.instance = AppDataSource;
+    }
+
+    return SingletonDb.dataSource;
+  }
+
+  public static async initialize(): Promise<void> {
+    if (!SingletonDb.dataSource.isInitialized) {
+      await SingletonDb.dataSource.initialize();
+    }
+  }
+}

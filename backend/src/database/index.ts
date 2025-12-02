@@ -1,2 +1,2 @@
-import { AppDataSource } from "./data-source";
-export default AppDataSource;
+import { SingletonDb } from "./data-source";
+export default SingletonDb;
