@@ -4,7 +4,9 @@
 		"module": "ESNext",
 		"baseUrl": "./src",
 		"paths": {
-			"@/*": ["*"]
+			"@/*": [
+				"*"
+			]
 		},
 		"moduleResolution": "Node",
 		"outDir": "dist",
@@ -13,8 +15,18 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"types": ["vitest/globals"]
+		"types": [
+			"vitest/globals"
+		],
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"useDefineForClassFields": false,
+		"strictPropertyInitialization": false
 	},
-	"include": ["src/**/*"],
-	"exclude": ["node_modules"]
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"node_modules"
+	]
 }
