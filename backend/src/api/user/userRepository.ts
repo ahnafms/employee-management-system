@@ -1,30 +1,33 @@
-import type { User } from "@/api/user/userModel";
+import { User } from "@/database/entities/userEntity";
+import { DataSource, Repository } from "typeorm";
 
-export const users: User[] = [
-	{
-		id: 1,
-		name: "Alice",
-		email: "alice@example.com",
-		age: 42,
-		createdAt: new Date(),
-		updatedAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days later
-	},
-	{
-		id: 2,
-		name: "Robert",
-		email: "Robert@example.com",
-		age: 21,
-		createdAt: new Date(),
-		updatedAt: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days later
-	},
-];
+export class UserRepository extends Repository<User> {
+  constructor(private dataSource: DataSource) {
+    super(User, dataSource.manager);
+  }
 
-export class UserRepository {
-	async findAllAsync(): Promise<User[]> {
-		return users;
-	}
+  async findAllAsync(): Promise<User[]> {
+    return this.find();
+  }
 
-	async findByIdAsync(id: number): Promise<User | null> {
-		return users.find((user) => user.id === id) || null;
-	}
+  async findByIdAsync(id: number): Promise<User | null> {
+    return this.findOneBy({ id });
+  }
+
+  async createAsync(userData: Partial<User>): Promise<User> {
+    const user = this.create(userData);
+    return this.save(user);
+  }
+
+  async updateAsync(id: number, userData: Partial<User>): Promise<User | null> {
+    const user = await this.findOneBy({ id });
+    if (!user) return null;
+    Object.assign(user, userData);
+    return this.save(user);
+  }
+
+  async deleteAsync(id: number): Promise<boolean> {
+    const result = await this.delete(id);
+    return result.affected !== 0;
+  }
 }

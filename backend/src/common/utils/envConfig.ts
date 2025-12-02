@@ -29,6 +29,12 @@ const envSchema = z.object({
   DB_PASSWORD: z.string().min(1).default("password"),
 
   DB_DATABASE: z.string().min(1).default("employee_management_system"),
+
+  SALT_ROUNDS: z.coerce.number().int().positive().default(10),
+
+  JWT_SECRET: z.string().min(64),
+
+  JWT_EXPIRES_IN: z.number().default(3600),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
