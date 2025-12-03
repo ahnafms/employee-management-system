@@ -112,5 +112,4 @@ export class EmployeeController {
   };
 }
 
-// Export singleton instance
 export const employeeController = new EmployeeController();

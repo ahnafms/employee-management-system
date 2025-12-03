@@ -20,13 +20,11 @@ authRegistry.registerPath({
   tags: ["Auhentication"],
   summary: "User Login",
   description: "Authenticate user and return JWT token",
-  requestBody: {
-    description: "Login credentials",
-    required: true,
-    content: {
-      "application/json": {
-        schema: {
-          $ref: "#/components/schemas/Login",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: LoginRequestSchema,
         },
       },
     },

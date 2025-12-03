@@ -45,3 +45,7 @@ export const UpdateEmployeeSchema = EmployeeSchema.partial().omit({
   created_at: true,
   updated_at: true,
 });
+
+export type Employee = z.infer<typeof EmployeeSchema>;
+export type CreateEmployee = z.infer<typeof CreateEmployeeSchema>;
+export type UpdateEmployee = z.infer<typeof UpdateEmployeeSchema>;
