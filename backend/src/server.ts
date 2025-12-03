@@ -12,6 +12,8 @@ import { env } from "./common/utils/envConfig";
 import SingletonDb from "./database";
 import { authRouter } from "./api/auth/authRouter";
 import { employeeRouter } from "./api/employee/employeeRouter";
+import { notificationRouter } from "./api/notification/notificationRouter";
+import "@/api/notification/notificationSubscriber";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -22,7 +24,7 @@ app.set("trust proxy", true);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+app.use(cors({ origin: env.CORS_ORIGIN }));
 app.use(helmet());
 app.use(rateLimiter);
 
@@ -35,6 +37,8 @@ app.use("/users", userRouter);
 
 app.use("/login", authRouter);
 app.use("/employees", employeeRouter);
+
+app.use("/notifications", notificationRouter);
 
 // Swagger UI
 app.use(openAPIRouter);
