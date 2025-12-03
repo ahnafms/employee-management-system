@@ -7,11 +7,27 @@ import {
   extendZodWithOpenApi,
 } from "@asteasolutions/zod-to-openapi";
 import z from "zod";
+import multer from "multer";
+import path from "path";
 
 extendZodWithOpenApi(z);
 
 export const employeeRouter: Router = express.Router();
 export const employeeRegistry = new OpenAPIRegistry();
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, `./src/tmp/uploads`);
+  },
+  filename: (req, file, cb) => {
+    cb(
+      null,
+      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
+    );
+  },
+});
+
+export const upload = multer({ storage: storage });
 
 //!TODO: Protect all routes with authentication
 // employeeRouter.use(authMiddleware);
@@ -141,6 +157,53 @@ employeeRegistry.registerPath({
     },
     404: {
       description: "Employee not found",
+    },
+  },
+});
+
+employeeRouter.post(
+  "/upload-csv",
+  upload.single("file"),
+  employeeController.createEmployeeByCsv
+);
+
+employeeRegistry.registerPath({
+  method: "post",
+  path: "/employees/upload-csv",
+  description: "Upload a CSV file to batch-create employees",
+  request: {
+    body: {
+      content: {
+        "multipart/form-data": {
+          schema: z.object({
+            file: z
+              .any()
+              .openapi({
+                type: "string",
+                format: "binary",
+              })
+              .describe("CSV file containing employee records"),
+          }),
+        },
+      },
+    },
+  },
+  responses: {
+    202: {
+      description: "CSV received and processing started (queued)",
+      content: {
+        "application/json": {
+          schema: z.object({
+            message: z.string(),
+            totalRows: z.number().optional(),
+            queued: z.number().optional(),
+            invalidRows: z.number().optional(),
+          }),
+        },
+      },
+    },
+    400: {
+      description: "Invalid CSV file",
     },
   },
 });

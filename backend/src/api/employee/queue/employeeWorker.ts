@@ -5,7 +5,6 @@ import { EmployeeRepository } from "../employeeRepository";
 import { EmployeeService } from "../employeeService";
 import { env } from "@/common/utils/envConfig";
 import { logger } from "@/server";
-import { sendSseMessage, sseHandler } from "@/common/utils/sseHandler";
 import Redis from "ioredis";
 
 export class EmployeeWorker {
@@ -38,7 +37,7 @@ export class EmployeeWorker {
    * Core job processor
    */
   private async processJob(job: Job) {
-    console.log(`[EmployeeWorker] Processing job: ${job.name}`);
+    logger.info(`[EmployeeWorker] Processing job: ${job.name}`);
 
     const dataSource = SingletonDb.getConnection();
     const repo = new EmployeeRepository(dataSource.getRepository(Employee));
@@ -48,7 +47,7 @@ export class EmployeeWorker {
       case "create-employee":
         const result = await service.createEmployee(job.data);
         try {
-          const res = await this.redisPublisher.publish(
+          await this.redisPublisher.publish(
             "employee-events",
             JSON.stringify({
               event: "create-employee",
@@ -59,12 +58,18 @@ export class EmployeeWorker {
               },
             })
           );
-          console.log(res);
         } catch (err) {
-          console.error("Error publishing SSE message:", err);
+          logger.error(`Error publishing SSE message: ${err}`);
         }
         logger.info(`[EmployeeWorker] Employee created with ID: ${result.id}`);
         break;
+
+      case "bulk-create-employee":
+        try {
+          await service.bulkCreateEmployees(job.data);
+        } catch (err) {
+          logger.error(`[EmployeeWorker] Employee failed bulk create: ${err}`);
+        }
 
       default:
         logger.warn(`[EmployeeWorker] Unknown job: ${job.name}`);

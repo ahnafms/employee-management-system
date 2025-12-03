@@ -41,4 +41,11 @@ export class EmployeeRepository {
   async findByName(name: string): Promise<Employee | null> {
     return this.employeeRepository.findOne({ where: { name } });
   }
+
+  async bulkCreateEmployees(
+    employees: Partial<Employee>[]
+  ): Promise<Employee[]> {
+    const result = await this.employeeRepository.insert(employees);
+    return employees as Employee[];
+  }
 }

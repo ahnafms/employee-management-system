@@ -26,4 +26,11 @@ export class EmployeeService {
   async deleteEmployee(id: string): Promise<boolean> {
     return this.repo.deleteEmployee(id);
   }
+
+  async bulkCreateEmployees(
+    employees: Partial<Employee>[]
+  ): Promise<Employee[]> {
+    // 🎯 Delegate the array insertion to the repository layer.
+    return this.repo.bulkCreateEmployees(employees);
+  }
 }
