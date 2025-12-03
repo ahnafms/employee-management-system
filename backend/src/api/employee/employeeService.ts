@@ -30,7 +30,6 @@ export class EmployeeService {
   async bulkCreateEmployees(
     employees: Partial<Employee>[]
   ): Promise<Employee[]> {
-    // 🎯 Delegate the array insertion to the repository layer.
     return this.repo.bulkCreateEmployees(employees);
   }
 }

@@ -7,6 +7,11 @@ import { env } from "@/common/utils/envConfig";
 import { logger } from "@/server";
 import Redis from "ioredis";
 
+import * as fs from "fs";
+import csv from "csv-parser";
+import { Transform } from "stream";
+import { countCsvLines } from "@/common/utils/fileHelper";
+
 export class EmployeeWorker {
   private worker: Worker;
   private redisPublisher: RedisClient;
@@ -45,8 +50,8 @@ export class EmployeeWorker {
 
     switch (job.name) {
       case "create-employee":
-        const result = await service.createEmployee(job.data);
         try {
+          const result = await service.createEmployee(job.data);
           await this.redisPublisher.publish(
             "employee-events",
             JSON.stringify({
@@ -58,14 +63,119 @@ export class EmployeeWorker {
               },
             })
           );
+          logger.info(
+            `[EmployeeWorker] Employee created with ID: ${result.id}`
+          );
         } catch (err) {
           logger.error(`Error publishing SSE message: ${err}`);
         }
-        logger.info(`[EmployeeWorker] Employee created with ID: ${result.id}`);
         break;
 
-      case "bulk-create-employee":
+      case "bulk-create-employee-csv":
         try {
+          const filePath = job.data;
+
+          const batchSize = 1000;
+          let employeeBatch: any[] = [];
+          let recordCount = 0;
+          const redisPublisher = this.redisPublisher;
+
+          const totalRecordCount = await countCsvLines(filePath);
+
+          const readStream = fs.createReadStream(filePath);
+
+          const batcherStream = new Transform({
+            objectMode: true,
+            async transform(chunk, encoding, callback) {
+              employeeBatch.push(chunk);
+              recordCount++;
+
+              if (employeeBatch.length >= batchSize) {
+                try {
+                  logger.info(
+                    `Processing batch of ${employeeBatch.length} records...`
+                  );
+
+                  const percentCompleted = Math.round(
+                    (recordCount / totalRecordCount) * 100
+                  );
+
+                  await service.bulkCreateEmployees(employeeBatch);
+                  await redisPublisher.publish(
+                    "employee-events",
+                    JSON.stringify({
+                      event: "bulk-create-employee-progress",
+                      data: {
+                        jobId: job.id,
+                        status: "PROCESSING",
+                        progress: percentCompleted,
+                        message: `Processed ${recordCount} of ${totalRecordCount} records (${percentCompleted}% complete)...`,
+                      },
+                    })
+                  );
+                  employeeBatch = [];
+                  callback();
+                } catch (error) {
+                  console.error("Error processing batch:", error);
+                  callback(error as Error);
+                }
+              } else {
+                callback();
+              }
+            },
+            async flush(callback) {
+              if (employeeBatch.length > 0) {
+                try {
+                  logger.info(
+                    `Processing final batch of ${employeeBatch.length} records...`
+                  );
+                  await service.bulkCreateEmployees(employeeBatch);
+                  await redisPublisher.publish(
+                    "employee-events",
+                    JSON.stringify({
+                      event: "bulk-create-employee-completed",
+                      data: {
+                        jobId: job.id,
+                        status: "COMPLETED",
+                        progress: 100,
+                        message: `CSV file fully processed. Total records: ${recordCount}`,
+                      },
+                    })
+                  );
+                  employeeBatch = [];
+                } catch (error) {
+                  logger.error(`Error processing final batch: ${error}`);
+                  callback(error as Error);
+                  return;
+                }
+              }
+              logger.info(
+                `CSV file fully processed. Total records: ${recordCount}`
+              );
+              fs.unlink(filePath, (err) => {
+                if (err) console.error("Could not delete temp file:", err);
+              });
+              callback();
+            },
+          });
+
+          try {
+            await new Promise<void>((resolve, reject) => {
+              readStream
+                .pipe(csv())
+                .pipe(batcherStream)
+                .on("error", (err) => {
+                  readStream.close();
+                  reject(err);
+                })
+                .on("finish", () => {
+                  resolve();
+                });
+            });
+          } catch (error) {
+            console.error("Pipeline failed:", error);
+            throw new Error("Failed to process CSV file via stream pipeline.");
+          }
           await service.bulkCreateEmployees(job.data);
         } catch (err) {
           logger.error(`[EmployeeWorker] Employee failed bulk create: ${err}`);
@@ -90,5 +200,4 @@ export class EmployeeWorker {
   }
 }
 
-// Export instance if needed
 export const employeeWorker = new EmployeeWorker();
