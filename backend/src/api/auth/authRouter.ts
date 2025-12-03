@@ -8,6 +8,7 @@ import {
   LoginResponseSchema,
   LoginSchema,
 } from "./authModel";
+import z from "zod";
 
 export const authRegistry = new OpenAPIRegistry();
 export const authRouter: Router = express.Router();
@@ -16,8 +17,8 @@ authRegistry.register("Login", LoginRequestSchema);
 
 authRegistry.registerPath({
   method: "post",
-  path: "/login",
-  tags: ["Auhentication"],
+  path: "/auth/login",
+  tags: ["Authentication"],
   summary: "User Login",
   description: "Authenticate user and return JWT token",
   request: {
@@ -32,4 +33,28 @@ authRegistry.registerPath({
   responses: createApiResponse(LoginResponseSchema, "Success"),
 });
 
-authRouter.post("/", validateRequest(LoginRequestSchema), authController.login);
+authRegistry.registerPath({
+  method: "get",
+  path: "/auth/verify",
+  tags: ["Authentication"],
+  summary: "Verify User Authentication",
+  description: "Check if user is authenticated by verifying JWT from cookie",
+  responses: createApiResponse(LoginResponseSchema, "Success"),
+});
+
+authRegistry.registerPath({
+  method: "get",
+  path: "/auth/logout",
+  tags: ["Authentication"],
+  summary: "Logout User",
+  description: "Clear JWT cookie to log out the user",
+  responses: createApiResponse(z.object(), "Logout successful"),
+});
+
+authRouter.post(
+  "/login",
+  validateRequest(LoginRequestSchema),
+  authController.login
+);
+authRouter.get("/verify", authController.verify);
+authRouter.post("/logout", authController.logout);

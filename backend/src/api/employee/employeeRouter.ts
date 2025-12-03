@@ -38,6 +38,7 @@ employeeRouter.post(
   employeeController.createEmployee
 );
 employeeRegistry.registerPath({
+  tags: ["Employee"],
   method: "post",
   path: "/employees",
   description: "Create a new employee",
@@ -64,6 +65,7 @@ employeeRegistry.registerPath({
 
 employeeRouter.get("/", employeeController.getEmployeesWithPagination);
 employeeRegistry.registerPath({
+  tags: ["Employee"],
   method: "get",
   path: "/employees",
   description: "Get all employees with pagination, search, and sort",
@@ -129,6 +131,7 @@ employeeRouter.get(
   employeeController.getEmployeeById
 );
 employeeRegistry.registerPath({
+  tags: ["Employee"],
   method: "get",
   path: "/employees/{id}",
   description: "Get employee by ID",
@@ -158,6 +161,7 @@ employeeRouter.patch(
   employeeController.updateEmployee
 );
 employeeRegistry.registerPath({
+  tags: ["Employee"],
   method: "put",
   path: "/employees/{id}",
   description: "Update an employee",
@@ -190,6 +194,7 @@ employeeRegistry.registerPath({
 
 employeeRouter.delete("/:id", employeeController.deleteEmployee);
 employeeRegistry.registerPath({
+  tags: ["Employee"],
   method: "delete",
   path: "/employees/{id}",
   description: "Delete an employee",
@@ -215,6 +220,7 @@ employeeRouter.post(
 );
 
 employeeRegistry.registerPath({
+  tags: ["Employee"],
   method: "post",
   path: "/employees/upload-csv",
   description: "Upload a CSV file to batch-create employees",

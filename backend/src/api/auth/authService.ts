@@ -63,4 +63,43 @@ export class AuthService {
       throw new Error(errorMessage);
     }
   }
+
+  async verifyToken(token: string): Promise<{
+    valid: boolean;
+    email?: string;
+    roles?: string[];
+    expiresAt?: string;
+    message: string;
+  }> {
+    try {
+      const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayload & {
+        iat?: number;
+        exp?: number;
+      };
+
+      const expiresAt = decoded.exp
+        ? new Date(decoded.exp * 1000).toISOString()
+        : undefined;
+
+      return {
+        valid: true,
+        email: decoded.email,
+        roles: decoded.roles,
+        expiresAt,
+        message: "Token is valid",
+      };
+    } catch (err) {
+      const errorMsg = (err as Error).message;
+      logger.error(`Token verification failed: ${errorMsg}`);
+
+      return {
+        valid: false,
+        message: errorMsg.includes("expired")
+          ? "Token has expired"
+          : errorMsg.includes("invalid")
+          ? "Token signature is invalid or token was modified"
+          : "Token verification failed",
+      };
+    }
+  }
 }
