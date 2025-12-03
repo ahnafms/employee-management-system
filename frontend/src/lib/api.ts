@@ -67,7 +67,6 @@ export async function apiClient<T = unknown>(
     const response = await fetch(url, config);
 
     if (response.status === 401) {
-      window.location.href = "/login";
       const errorResponse = parseErrorResponse(401, {
         message: "Unauthorized - please login again",
       });

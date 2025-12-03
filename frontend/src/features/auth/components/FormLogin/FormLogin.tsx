@@ -1,7 +1,3 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import {
   Card,
   CardContent,
@@ -14,51 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { login } from "@/features/auth/api/login";
-
-const loginSchema = z.object({
-  email: z.email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import { useFormLogin } from "./useFormLogin";
 
 interface FormLoginProps {
   onSuccess?: () => void;
 }
 
 export function FormLogin({ onSuccess }: FormLoginProps) {
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await login(data);
-
-      console.log(response);
-      if (response.success) {
-        onSuccess?.();
-      } else {
-        setError(response.message || "Login failed");
-      }
-    } catch (err: any) {
-      console.error(err);
-      setError(err?.message || "An error occurred during login");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { error, loading, register, handleSubmit, errors, onSubmit } =
+    useFormLogin({ onSuccess });
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">

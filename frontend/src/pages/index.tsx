@@ -29,9 +29,10 @@ const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
   component: LoginPage,
-  beforeLoad: () => {
+  beforeLoad: async () => {
     // If already authenticated, redirect to dashboard
-    if (isAuthenticated()) {
+    const authenticated = await isAuthenticated();
+    if (authenticated) {
       throw redirect({
         to: "/home/dashboard",
       });
@@ -45,18 +46,34 @@ const homeLayoutRoute = createRoute({
   component: HomePageLayout,
 
   // *** PROTECTION GUARD FOR ALL /home/* ROUTES ***
-  beforeLoad: ({ location }) => {
-    if (!isAuthenticated()) {
-      console.log("User not authenticated, redirecting to login.");
-      // If not authenticated, throw a redirect to the login page.
+  beforeLoad: async ({ location }) => {
+    const authenticated = await isAuthenticated();
+    if (!authenticated) {
       throw redirect({
         to: "/login",
         search: {
-          // Pass the current path so the user can be redirected back after login
           redirect: location.href,
         },
       });
     }
+  },
+
+  // Handle route errors (e.g., 401 from API calls)
+  errorComponent: ({ error }) => {
+    // If it's a 401 error, redirect to login
+    if (
+      error &&
+      typeof error === "object" &&
+      "statusCode" in error &&
+      error.statusCode === 401
+    ) {
+      throw redirect({
+        to: "/login",
+        replace: true,
+      });
+    }
+    // Otherwise, show error page
+    return <div>Error loading dashboard: {String(error)}</div>;
   },
 });
 

@@ -1,13 +1,25 @@
-import { Outlet, Link } from "@tanstack/react-router";
+import { Outlet, Link, useNavigate } from "@tanstack/react-router";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { NotificationsButton } from "@/features/employee/components/NotificationsButton";
+import { logout } from "@/features/auth/api/login";
 
 const navItems = [{ name: "Dashboard", path: "/home/dashboard" }];
 
 const Sidebar = () => {
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "";
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate({ to: "/login" });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   return (
     <div className="w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 h-full p-4 flex flex-col">
@@ -37,9 +49,7 @@ const Sidebar = () => {
       <Button
         variant="ghost"
         className="mt-auto text-left"
-        onClick={() => {
-          localStorage.removeItem("authToken");
-        }}
+        onClick={handleLogout}
       >
         Logout
       </Button>
