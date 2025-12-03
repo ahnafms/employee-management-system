@@ -1,12 +1,8 @@
 import type { ApiClientOptions, ApiErrorResponse } from "@/types/api";
 import { ApiError } from "@/types/api";
+import { env } from "@/config/env";
+const DEFAULT_TIMEOUT = 30000;
 
-const API_BASE_URL = "http://localhost:8080";
-const DEFAULT_TIMEOUT = 30000; // 30 seconds
-
-/**
- * Parse error response from API
- */
 function parseErrorResponse(
   statusCode: number,
   data: unknown
@@ -34,34 +30,18 @@ function parseErrorResponse(
   };
 }
 
-/**
- * Main API client function with proper error handling
- * @param endpoint - API endpoint path
- * @param method - HTTP method (GET, POST, PUT, DELETE, etc.)
- * @param data - Request body data
- * @param options - Additional options (isFormData, timeout)
- * @returns Parsed response data
- * @throws ApiError with statusCode and error details
- */
 export async function apiClient<T = unknown>(
   endpoint = "",
   method: string = "GET",
   data?: unknown,
   options?: ApiClientOptions
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${env.baseUrl}${endpoint}`;
   const isFormData = options?.isFormData || data instanceof FormData;
   const timeout = options?.timeout ?? DEFAULT_TIMEOUT;
 
   const headers: Record<string, string> = {};
 
-  // Get auth token from localStorage
-  const authToken = localStorage.getItem("authToken");
-  if (authToken) {
-    headers["Authorization"] = `Bearer ${authToken}`;
-  }
-
-  // Set content type if not FormData
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
@@ -86,9 +66,7 @@ export async function apiClient<T = unknown>(
   try {
     const response = await fetch(url, config);
 
-    // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401) {
-      localStorage.removeItem("authToken");
       window.location.href = "/login";
       const errorResponse = parseErrorResponse(401, {
         message: "Unauthorized - please login again",
