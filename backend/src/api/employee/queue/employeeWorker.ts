@@ -1,13 +1,16 @@
-import { Worker, Job } from "bullmq";
+import { Worker, Job, RedisClient } from "bullmq";
 import SingletonDb from "@/database";
 import { Employee } from "@/database/entities/employeeEntity";
 import { EmployeeRepository } from "../employeeRepository";
 import { EmployeeService } from "../employeeService";
 import { env } from "@/common/utils/envConfig";
 import { logger } from "@/server";
+import { sendSseMessage, sseHandler } from "@/common/utils/sseHandler";
+import Redis from "ioredis";
 
 export class EmployeeWorker {
   private worker: Worker;
+  private redisPublisher: RedisClient;
 
   constructor() {
     const connection = {
@@ -20,6 +23,11 @@ export class EmployeeWorker {
       async (job) => this.processJob(job),
       { connection }
     );
+
+    this.redisPublisher = new Redis({
+      host: env.REDIS_HOST,
+      port: env.REDIS_PORT,
+    });
 
     this.registerEvents();
 
@@ -38,7 +46,25 @@ export class EmployeeWorker {
 
     switch (job.name) {
       case "create-employee":
-        return await service.createEmployee(job.data);
+        const result = await service.createEmployee(job.data);
+        try {
+          const res = await this.redisPublisher.publish(
+            "employee-events",
+            JSON.stringify({
+              event: "create-employee",
+              data: {
+                jobId: job.id,
+                result,
+                message: `Employee created with ID: ${result.id}`,
+              },
+            })
+          );
+          console.log(res);
+        } catch (err) {
+          console.error("Error publishing SSE message:", err);
+        }
+        logger.info(`[EmployeeWorker] Employee created with ID: ${result.id}`);
+        break;
 
       default:
         logger.warn(`[EmployeeWorker] Unknown job: ${job.name}`);
