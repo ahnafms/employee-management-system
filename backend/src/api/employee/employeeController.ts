@@ -1,21 +1,25 @@
 import { Request, RequestHandler, Response } from "express";
 import { EmployeeService } from "./employeeService";
-import { EmployeeRepository } from "./employeeRepository";
 import SingletonDb from "@/database";
 import { Employee } from "@/database/entities/employeeEntity";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { CreateEmployeeSchema, UpdateEmployeeSchema } from "./employeeModel";
 import z from "zod";
+import { EmployeeQueue } from "./queue/employeeQueue";
+import { EmployeeRepository } from "./employeeRepository";
 
 export class EmployeeController {
   private employeeService: EmployeeService;
+  private employeeQueue: EmployeeQueue;
 
   constructor() {
     const dataSource = SingletonDb.getConnection();
     const employeeRepository = new EmployeeRepository(
       dataSource.getRepository(Employee)
     );
+
     this.employeeService = new EmployeeService(employeeRepository);
+    this.employeeQueue = new EmployeeQueue();
   }
 
   public createEmployee: RequestHandler = async (
@@ -24,10 +28,10 @@ export class EmployeeController {
   ) => {
     try {
       const validatedBody = CreateEmployeeSchema.parse(req.body);
-      const employee = await this.employeeService.createEmployee(validatedBody);
+      await this.employeeQueue.enqueueCreateEmployee(validatedBody);
       return res
         .status(201)
-        .json(ServiceResponse.success<Employee>("Employee created", employee));
+        .json(ServiceResponse.success("Employee queue created", {}));
     } catch (err) {
       if (err instanceof z.ZodError) {
         return res.status(400).json({

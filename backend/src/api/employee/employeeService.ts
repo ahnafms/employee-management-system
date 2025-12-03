@@ -1,5 +1,5 @@
-import { EmployeeRepository } from "./employeeRepository";
 import { Employee } from "@/database/entities/employeeEntity";
+import { EmployeeRepository } from "./employeeRepository";
 
 export class EmployeeService {
   constructor(private repo: EmployeeRepository) {}

@@ -35,7 +35,7 @@ export class EmployeeRepository {
 
   async deleteEmployee(id: string): Promise<boolean> {
     const result = await this.employeeRepository.delete(id);
-    return result.affected !== undefined && result.affected > 0;
+    return Boolean(result.affected);
   }
 
   async findByName(name: string): Promise<Employee | null> {
