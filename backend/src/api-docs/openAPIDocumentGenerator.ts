@@ -4,7 +4,6 @@ import {
 } from "@asteasolutions/zod-to-openapi";
 
 import { healthCheckRegistry } from "@/api/healthCheck/healthCheckRouter";
-import { userRegistry } from "@/api/user/userRouter";
 import { authRegistry } from "@/api/auth/authRouter";
 import { employeeRegistry } from "@/api/employee/employeeRouter";
 
@@ -15,7 +14,6 @@ export type OpenAPIDocument = ReturnType<
 export function generateOpenAPIDocument(): OpenAPIDocument {
   const registry = new OpenAPIRegistry([
     healthCheckRegistry,
-    userRegistry,
     authRegistry,
     employeeRegistry,
   ]);
