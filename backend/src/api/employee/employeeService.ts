@@ -1,5 +1,6 @@
 import { Employee } from "@/database/entities/employeeEntity";
 import { EmployeeRepository } from "./employeeRepository";
+import { PaginatedResponse } from "./employeeModel";
 
 export class EmployeeService {
   constructor(private repo: EmployeeRepository) {}
@@ -31,5 +32,37 @@ export class EmployeeService {
     employees: Partial<Employee>[]
   ): Promise<Employee[]> {
     return this.repo.bulkCreateEmployees(employees);
+  }
+
+  async getEmployeesWithPagination(
+    page: number,
+    pageSize: number,
+    search?: string,
+    sortBy?: string,
+    sortOrder?: "ASC" | "DESC"
+  ): Promise<PaginatedResponse<Employee>> {
+    const { data, totalRecords } = await this.repo.findWithPagination(
+      page,
+      pageSize,
+      search,
+      sortBy,
+      sortOrder
+    );
+
+    const totalPages = Math.ceil(totalRecords / pageSize);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return {
+      data,
+      pagination: {
+        page,
+        pageSize,
+        totalRecords,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    };
   }
 }

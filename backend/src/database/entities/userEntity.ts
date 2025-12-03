@@ -20,6 +20,9 @@ export class User {
   @Column({ unique: true, type: "varchar" })
   email: string;
 
+  @Column({ type: "varchar" })
+  username: string;
+
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable({
     name: "users_roles",

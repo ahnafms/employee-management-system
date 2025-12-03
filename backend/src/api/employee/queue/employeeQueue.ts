@@ -1,10 +1,6 @@
 import { Queue } from "bullmq";
 import { env } from "@/common/utils/envConfig";
 import { CreateEmployee } from "../employeeModel";
-import * as fs from "fs";
-import csv from "csv-parser";
-import { Transform } from "stream";
-import { logger } from "@/server";
 
 const connection = {
   host: env.REDIS_HOST,

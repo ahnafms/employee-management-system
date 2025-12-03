@@ -5,9 +5,12 @@ import { GetUserSchema, UserSchema } from "@/api/user/userModel";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 import { validateRequest } from "@/common/utils/httpHandlers";
 import { userController } from "./userController";
+import { authenticateJWT, authorizeAdmin } from "@/common/middleware/auth";
 
 export const userRegistry = new OpenAPIRegistry();
 export const userRouter: Router = express.Router();
+
+userRouter.use(authenticateJWT, authorizeAdmin);
 
 userRegistry.register("User", UserSchema);
 

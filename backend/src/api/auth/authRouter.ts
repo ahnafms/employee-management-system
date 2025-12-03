@@ -8,6 +8,7 @@ import {
   LoginResponseSchema,
   LoginSchema,
 } from "./authModel";
+import z from "zod";
 
 export const authRegistry = new OpenAPIRegistry();
 export const authRouter: Router = express.Router();
@@ -24,7 +25,7 @@ authRegistry.registerPath({
     body: {
       content: {
         "application/json": {
-          schema: LoginRequestSchema,
+          schema: LoginSchema,
         },
       },
     },
@@ -32,4 +33,4 @@ authRegistry.registerPath({
   responses: createApiResponse(LoginResponseSchema, "Success"),
 });
 
-authRouter.post("/login", validateRequest(LoginSchema), authController.login);
+authRouter.post("/", validateRequest(LoginRequestSchema), authController.login);

@@ -31,7 +31,7 @@ export class Employee {
   position: string;
 
   @Column({ type: "decimal", precision: 15, scale: 2 })
-  salary: string;
+  salary: number;
 
   @CreateDateColumn({ name: "created_at" })
   created_at: Date;

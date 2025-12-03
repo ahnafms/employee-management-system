@@ -18,17 +18,15 @@ export const sseHandler = (req: Request, res: Response) => {
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
-  // Set a reasonable timeout
   res.setTimeout(0);
 
   const id = clientId++;
   clients.push({ id, res });
   logger.info(`🔌 SSE client connected: ${id} (user: ${id})`);
 
-  // Send heartbeat to keep connection alive
   const heartbeatInterval = setInterval(() => {
     res.write(": heartbeat\n\n");
-  }, 30000); // Every 30 seconds
+  }, 30000);
 
   res.write("event: connected\ndata: connected\n\n");
 
@@ -63,7 +61,6 @@ export const sendSseMessage = (event: string, data: any) => {
     }
   }
 
-  // Clean up disconnected clients
   for (const id of disconnectedClients) {
     const index = clients.findIndex((c) => c.id === id);
     if (index !== -1) {

@@ -16,7 +16,7 @@ export const validateRequest =
       next();
     } catch (err) {
       if (err instanceof ZodError) {
-        const errors = err.flatten().map((e) => {
+        const errors = err.issues.map((e) => {
           const fieldPath = e.path.length > 0 ? e.path.join(".") : "root";
           return `${fieldPath}: ${e.message}`;
         });

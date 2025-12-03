@@ -1,5 +1,6 @@
 import cors from "cors";
 import express, { type Express } from "express";
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { pino } from "pino";
 import { healthCheckRouter } from "@/api/healthCheck/healthCheckRouter";
@@ -24,7 +25,8 @@ app.set("trust proxy", true);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: env.CORS_ORIGIN }));
+app.use(cookieParser());
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 app.use(rateLimiter);
 

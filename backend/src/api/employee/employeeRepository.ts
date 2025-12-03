@@ -48,4 +48,41 @@ export class EmployeeRepository {
     const result = await this.employeeRepository.insert(employees);
     return employees as Employee[];
   }
+
+  async findWithPagination(
+    page: number,
+    pageSize: number,
+    search?: string,
+    sortBy: string = "created_at",
+    sortOrder: "ASC" | "DESC" = "DESC"
+  ): Promise<{ data: Employee[]; totalRecords: number }> {
+    let query = this.employeeRepository.createQueryBuilder("employee");
+
+    // Apply search filter
+    if (search && search.trim()) {
+      query = query.where(
+        "employee.name ILIKE :search OR employee.position ILIKE :search",
+        { search: `%${search}%` }
+      );
+    }
+
+    // Get total records before pagination
+    const totalRecords = await query.getCount();
+
+    // Apply sorting
+    const validSortFields = ["name", "position", "age", "salary", "created_at"];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "created_at";
+    query = query.orderBy(
+      `employee.${sortField}`,
+      sortOrder === "ASC" ? "ASC" : "DESC"
+    );
+
+    // Apply pagination
+    const skip = (page - 1) * pageSize;
+    query = query.skip(skip).take(pageSize);
+
+    const data = await query.getMany();
+
+    return { data, totalRecords };
+  }
 }

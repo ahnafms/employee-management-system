@@ -9,11 +9,15 @@ import {
 import z from "zod";
 import multer from "multer";
 import path from "path";
+import { authenticateJWT, authorizeAdmin } from "@/common/middleware/auth";
 
 extendZodWithOpenApi(z);
 
 export const employeeRouter: Router = express.Router();
 export const employeeRegistry = new OpenAPIRegistry();
+
+// Protect all employee routes: require valid JWT and admin role
+employeeRouter.use(authenticateJWT, authorizeAdmin);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -29,10 +33,6 @@ const storage = multer.diskStorage({
 
 export const upload = multer({ storage: storage });
 
-//!TODO: Protect all routes with authentication
-// employeeRouter.use(authMiddleware);
-
-// --- Routes with OpenAPI metadata ---
 employeeRouter.post(
   "/",
   validateRequest(CreateEmployeeSchema),
@@ -63,17 +63,61 @@ employeeRegistry.registerPath({
   },
 });
 
-employeeRouter.get("/", employeeController.getAllEmployees);
+employeeRouter.get("/", employeeController.getEmployeesWithPagination);
 employeeRegistry.registerPath({
   method: "get",
   path: "/employees",
-  description: "Get all employees",
+  description: "Get all employees with pagination, search, and sort",
+  request: {
+    query: z.object({
+      page: z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(1)
+        .openapi({ description: "Page number (1-indexed)", example: 1 }),
+      pageSize: z.coerce.number().int().positive().default(10).openapi({
+        description: "Number of records per page (10, 25, 50, 100, etc.)",
+        example: 10,
+      }),
+      search: z.string().optional().openapi({
+        description: "Search term to filter by name or position",
+        example: "John",
+      }),
+      sortBy: z
+        .enum(["name", "position", "age", "salary", "created_at"])
+        .default("created_at")
+        .openapi({
+          description: "Field to sort by",
+          example: "name",
+        }),
+      sortOrder: z.enum(["ASC", "DESC"]).default("DESC").openapi({
+        description: "Sort order (ASC for ascending, DESC for descending)",
+        example: "ASC",
+      }),
+    }),
+  },
   responses: {
     200: {
-      description: "List of employees",
+      description: "Paginated list of employees",
       content: {
         "application/json": {
-          schema: z.array(CreateEmployeeSchema),
+          schema: z.object({
+            success: z.boolean(),
+            message: z.string(),
+            data: z.object({
+              data: z.array(CreateEmployeeSchema),
+              pagination: z.object({
+                page: z.number(),
+                pageSize: z.number(),
+                totalRecords: z.number(),
+                totalPages: z.number(),
+                hasNextPage: z.boolean(),
+                hasPreviousPage: z.boolean(),
+              }),
+            }),
+            statusCode: z.number(),
+          }),
         },
       },
     },
@@ -105,9 +149,9 @@ employeeRegistry.registerPath({
   },
 });
 
-employeeRouter.put(
+employeeRouter.patch(
   "/:id",
-  validateRequest(UpdateEmployeeSchema),
+  validateRequest(z.object({ body: UpdateEmployeeSchema })),
   employeeController.updateEmployee
 );
 employeeRegistry.registerPath({
@@ -116,7 +160,7 @@ employeeRegistry.registerPath({
   description: "Update an employee",
   request: {
     params: z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
     }),
     body: {
       content: {

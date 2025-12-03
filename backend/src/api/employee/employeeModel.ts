@@ -46,6 +46,59 @@ export const UpdateEmployeeSchema = EmployeeSchema.partial().omit({
   updated_at: true,
 });
 
+export const GetEmployeesQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1).meta({
+    description: "Page number (1-indexed)",
+    example: 1,
+  }),
+  pageSize: z.coerce.number().int().positive().default(10).meta({
+    description: "Number of records per page (10, 25, 50, 100, etc.)",
+    example: 10,
+  }),
+  search: z.string().optional().meta({
+    description: "Search term to filter employees by name or position",
+    example: "John",
+  }),
+  sortBy: z
+    .enum(["name", "position", "age", "salary", "created_at"])
+    .default("created_at")
+    .meta({
+      description: "Field to sort by",
+      example: "name",
+    }),
+  sortOrder: z.enum(["ASC", "DESC"]).default("DESC").meta({
+    description: "Sort order (ASC for ascending, DESC for descending)",
+    example: "ASC",
+  }),
+});
+
+export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(
+  dataSchema: T
+) =>
+  z.object({
+    data: z.array(dataSchema),
+    pagination: z.object({
+      page: z.number(),
+      pageSize: z.number(),
+      totalRecords: z.number(),
+      totalPages: z.number(),
+      hasNextPage: z.boolean(),
+      hasPreviousPage: z.boolean(),
+    }),
+  });
+
 export type Employee = z.infer<typeof EmployeeSchema>;
 export type CreateEmployee = z.infer<typeof CreateEmployeeSchema>;
 export type UpdateEmployee = z.infer<typeof UpdateEmployeeSchema>;
+export type GetEmployeesQuery = z.infer<typeof GetEmployeesQuerySchema>;
+export type PaginatedResponse<T> = {
+  data: T[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalRecords: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+};

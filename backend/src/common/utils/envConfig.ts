@@ -39,6 +39,14 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(64),
 
   JWT_EXPIRES_IN: z.number().default(3600),
+
+  ADMIN_EMAIL: z.email().default("admin@gmail.com"),
+
+  ADMIN_PASSWORD: z.string().default("12345678"),
+
+  JWT_COOKIE_NAME: z.string().default("auth_token"),
+
+  JWT_COOKIE_MAX_AGE: z.coerce.number().int().positive().default(3600000),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

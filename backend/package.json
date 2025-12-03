@@ -19,7 +19,8 @@
     "migration:generate": "tsx -r dotenv/config ./node_modules/typeorm/cli.js migration:generate -d ./src/database/data-source.ts ./src/database/migrations/${MIGRATION_NAME}",
     "migration:revert": "tsx -r dotenv/config ./node_modules/typeorm/cli.js migration:revert -d ./src/database/data-source.ts",
     "migration:up": "tsx -r dotenv/config ./node_modules/typeorm/cli.js migration:run -d ./src/database/data-source.ts",
-    "migration:show": "tsx -r dotenv/config ./node_modules/typeorm/cli.js migration:show -d ./src/database/data-source.ts"
+    "migration:show": "tsx -r dotenv/config ./node_modules/typeorm/cli.js migration:show -d ./src/database/data-source.ts",
+    "seed:admin": "tsx -r dotenv/config src/database/seeds/seedAdmin.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "8.1.0",
@@ -27,6 +28,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.65.1",
+    "cookie-parser": "^1.4.7",
     "cors": "2.8.5",
     "csv-parser": "^3.2.0",
     "dotenv": "17.2.1",

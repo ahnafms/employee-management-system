@@ -3,13 +3,13 @@ import { User } from "@/database/entities/userEntity";
 import { UserRepository } from "./authRepository";
 import bcrypt from "bcrypt";
 import { env } from "@/common/utils/envConfig";
-import { JwtPayload, LoginRequest } from "./authModel";
+import { JwtPayload, Login } from "./authModel";
 import * as jwt from "jsonwebtoken";
 
 export class AuthService {
   constructor(private userRepository: UserRepository) {}
 
-  async login(data: LoginRequest): Promise<string> {
+  async login(data: Login): Promise<string> {
     try {
       const user = await this.userRepository.findUserByEmail(data.email);
 
