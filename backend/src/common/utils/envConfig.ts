@@ -30,6 +30,10 @@ const envSchema = z.object({
 
   DB_DATABASE: z.string().min(1).default("employee_management_system"),
 
+  REDIS_HOST: z.string().min(1).default("localhost"),
+
+  REDIS_PORT: z.coerce.number().int().positive().default(6379),
+
   SALT_ROUNDS: z.coerce.number().int().positive().default(10),
 
   JWT_SECRET: z.string().min(64),
