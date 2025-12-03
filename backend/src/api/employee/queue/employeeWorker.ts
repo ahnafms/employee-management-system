@@ -100,6 +100,9 @@ export class EmployeeWorker {
                     (recordCount / totalRecordCount) * 100
                   );
 
+                  const status =
+                    percentCompleted === 100 ? "COMPLETED" : "PROCESSING";
+
                   await service.bulkCreateEmployees(employeeBatch);
                   await redisPublisher.publish(
                     "employee-events",
@@ -107,7 +110,7 @@ export class EmployeeWorker {
                       event: "bulk-create-employee-progress",
                       data: {
                         jobId: job.id,
-                        status: "PROCESSING",
+                        status,
                         progress: percentCompleted,
                         message: `Processed ${recordCount} of ${totalRecordCount} records (${percentCompleted}% complete)...`,
                       },
@@ -173,7 +176,10 @@ export class EmployeeWorker {
                 });
             });
           } catch (error) {
-            console.error("Pipeline failed:", error);
+            logger.error(
+              error,
+              "Failed to process CSV file via stream pipeline."
+            );
             throw new Error("Failed to process CSV file via stream pipeline.");
           }
           await service.bulkCreateEmployees(job.data);

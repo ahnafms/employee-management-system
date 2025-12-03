@@ -3,10 +3,10 @@ import SingletonDb from "@/database";
 import { AuthService } from "./authService";
 import { UserRepository } from "./authRepository";
 import { LoginResponse, LoginSchema } from "./authModel";
-import z from "zod";
 import { User } from "@/database/entities/userEntity";
 import { ServiceResponse } from "@/common/models/serviceResponse";
 import { env } from "@/common/utils/envConfig";
+import { StatusCodes } from "http-status-codes";
 
 class AuthController {
   private authService: AuthService;
@@ -35,13 +35,9 @@ class AuthController {
         })
       );
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Invalid request",
-          errors: err.issues,
-        });
-      }
-      return res.status(500).json({ message: (err as Error).message });
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ServiceResponse.failure("Internal Server Error", err));
     }
   };
 }

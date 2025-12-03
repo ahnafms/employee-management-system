@@ -8,7 +8,6 @@ import {
   LoginResponseSchema,
   LoginSchema,
 } from "./authModel";
-import z from "zod";
 
 export const authRegistry = new OpenAPIRegistry();
 export const authRouter: Router = express.Router();

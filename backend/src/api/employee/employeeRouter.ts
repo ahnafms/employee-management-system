@@ -16,7 +16,6 @@ extendZodWithOpenApi(z);
 export const employeeRouter: Router = express.Router();
 export const employeeRegistry = new OpenAPIRegistry();
 
-// Protect all employee routes: require valid JWT and admin role
 employeeRouter.use(authenticateJWT, authorizeAdmin);
 
 const storage = multer.diskStorage({
@@ -124,14 +123,18 @@ employeeRegistry.registerPath({
   },
 });
 
-employeeRouter.get("/:id", employeeController.getEmployeeById);
+employeeRouter.get(
+  "/:id",
+  validateRequest(z.object({ params: z.object({ id: z.uuid() }) })),
+  employeeController.getEmployeeById
+);
 employeeRegistry.registerPath({
   method: "get",
   path: "/employees/{id}",
   description: "Get employee by ID",
   request: {
     params: z.object({
-      id: z.string().uuid(),
+      id: z.uuid(),
     }),
   },
   responses: {

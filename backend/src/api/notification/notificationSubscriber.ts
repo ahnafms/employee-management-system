@@ -8,10 +8,9 @@ export const redisSubscriber = new Redis({
   port: env.REDIS_PORT,
 });
 
-// Subscribe to the channel
 redisSubscriber.subscribe("employee-events", (err, count) => {
   if (err) {
-    logger.error("Failed to subscribe to Redis channel:", err);
+    logger.error(err, "Failed to subscribe to Redis channel:");
   } else {
     logger.info(`📡 Subscribed to ${count} Redis channel(s)`);
   }
@@ -24,7 +23,7 @@ redisSubscriber.on("message", (channel, message) => {
       sendSseMessage(event, data);
       logger.info(`📨 Forwarded SSE message from Redis: ${event}`);
     } catch (error) {
-      logger.error("Failed to parse Redis message:", error);
+      logger.error(error, "Failed to parse Redis message:");
     }
   }
 });

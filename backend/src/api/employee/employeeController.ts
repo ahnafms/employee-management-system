@@ -11,6 +11,7 @@ import {
 import z from "zod";
 import { EmployeeQueue } from "./queue/employeeQueue";
 import { EmployeeRepository } from "./employeeRepository";
+import { StatusCodes } from "http-status-codes";
 
 export class EmployeeController {
   private employeeService: EmployeeService;
@@ -78,13 +79,9 @@ export class EmployeeController {
         ServiceResponse.success("Employees fetched with pagination", result)
       );
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Invalid query parameters",
-          errors: err.errors,
-        });
-      }
-      return res.status(500).json({ message: (err as Error).message });
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ServiceResponse.failure("Internal server error", err));
     }
   };
 
@@ -97,12 +94,16 @@ export class EmployeeController {
         req.params.id
       );
       if (!employee)
-        return res.status(404).json({ message: "Employee not found" });
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Employee not found" });
       return res.json(
         ServiceResponse.success<Employee>("Employee fetched", employee)
       );
     } catch (err) {
-      return res.status(500).json({ message: (err as Error).message });
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ServiceResponse.failure("Failed fetch employee", {}));
     }
   };
 
@@ -117,18 +118,16 @@ export class EmployeeController {
         validatedBody
       );
       if (!updatedEmployee)
-        return res.status(404).json({ message: "Employee not found" });
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json(ServiceResponse.failure("Employee Not Found", {}));
       return res.json(
         ServiceResponse.success<Employee>("Employee updated", updatedEmployee)
       );
     } catch (err) {
-      if (err instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Invalid request",
-          errors: err,
-        });
-      }
-      return res.status(500).json({ message: (err as Error).message });
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ServiceResponse.failure("Employee failed update", err));
     }
   };
 
@@ -139,10 +138,14 @@ export class EmployeeController {
     try {
       const success = await this.employeeService.deleteEmployee(req.params.id);
       if (!success)
-        return res.status(404).json({ message: "Employee not found" });
-      return res.status(204).send();
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json(ServiceResponse.failure("Employee not found", {}));
+      return res.status(StatusCodes.NO_CONTENT).send();
     } catch (err) {
-      return res.status(500).json({ message: (err as Error).message });
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ServiceResponse.failure("Employee error delete", err));
     }
   };
 
@@ -154,7 +157,9 @@ export class EmployeeController {
 
     try {
       if (!file) {
-        return res.status(400).json({ message: "CSV file is required." });
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json(ServiceResponse.failure("CSV file is required", {}));
       }
 
       if (
@@ -162,20 +167,24 @@ export class EmployeeController {
         file.mimetype !== "application/vnd.ms-excel"
       ) {
         return res
-          .status(400)
-          .json({ message: "Invalid file type. Only CSV files are accepted." });
+          .status(StatusCodes.BAD_REQUEST)
+          .json(ServiceResponse.failure("Invalid type file", {}));
       }
 
       await this.employeeQueue.enqueueEmployeeCsv(file.path);
 
-      return res.status(202).json(
-        ServiceResponse.success("Employee CSV processing started (queued)", {
-          fileName: file.originalname,
-          filePath: file.path,
-        })
-      );
+      return res
+        .status(StatusCodes.CREATED)
+        .json(
+          ServiceResponse.success(
+            "Employee CSV processing started (queued)",
+            {}
+          )
+        );
     } catch (err) {
-      return res.status(500).json({ message: (err as Error).message });
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json(ServiceResponse.failure("Internal server error", err));
     }
   };
 }
