@@ -20,7 +20,7 @@ export const EmployeeSchema = z.object({
     description: "Employee's job position",
     example: "Software Engineer",
   }),
-  salary: z.string().meta({
+  salary: z.number().meta({
     description: "Employee's salary",
     example: "75000.00",
   }),
