@@ -42,4 +42,4 @@ export const ServiceResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
     message: z.string(),
     data: dataSchema.optional(),
     statusCode: z.number(),
-  });
+	});
