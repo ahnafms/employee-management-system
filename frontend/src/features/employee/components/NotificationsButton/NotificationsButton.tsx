@@ -51,7 +51,9 @@ export function NotificationsButton() {
                   key={i}
                   className="p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
-                  <div className="text-sm font-medium">{n.event}</div>
+                  <div className="text-sm font-medium text-black">
+                    {n.event}
+                  </div>
                   <div className="text-xs text-muted-foreground truncate">
                     {n.data?.message ?? JSON.stringify(n.data)}
                   </div>

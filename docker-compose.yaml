@@ -1,13 +1,14 @@
 version: "3.9"
 
 services:
-  # 1. PostgreSQL Database Service
   db:
     image: postgres:14-alpine
     container_name: postgres_db
     restart: always
-    env_file:
-      - .env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: employee_management_system
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
