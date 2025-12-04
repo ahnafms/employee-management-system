@@ -8,16 +8,14 @@ interface JwtPayloadWithRoles {
   [key: string]: unknown;
 }
 
-export const authenticateJWT: RequestHandler = (req, res, next) => {
+const authenticateJWT: RequestHandler = (req, res, next) => {
   try {
-    // Check Authorization header first
     let token: string | undefined;
     const authHeader = req.headers.authorization;
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
       token = authHeader.split(" ")[1];
     } else {
-      // Fall back to cookie if header not present
       token = req.cookies[env.JWT_COOKIE_NAME];
     }
 
@@ -27,7 +25,6 @@ export const authenticateJWT: RequestHandler = (req, res, next) => {
 
     const decoded = jwt.verify(token, env.JWT_SECRET) as JwtPayloadWithRoles;
 
-    // Attach user info to request for downstream handlers
     (req as any).user = decoded;
 
     return next();
@@ -36,7 +33,7 @@ export const authenticateJWT: RequestHandler = (req, res, next) => {
   }
 };
 
-export const authorizeAdmin: RequestHandler = (req, res, next) => {
+const authorizeAdmin: RequestHandler = (req, res, next) => {
   const user = (req as any).user as JwtPayloadWithRoles | undefined;
 
   if (!user || !Array.isArray(user.roles)) {
@@ -50,4 +47,4 @@ export const authorizeAdmin: RequestHandler = (req, res, next) => {
   return next();
 };
 
-export default { authenticateJWT, authorizeAdmin };
+export { authenticateJWT, authorizeAdmin };

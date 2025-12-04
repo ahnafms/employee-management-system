@@ -6,7 +6,7 @@ type SSEClient = {
   res: Response;
 };
 
-const CONNECTION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const CONNECTION_TIMEOUT = 15 * 60 * 1000;
 
 let clientId = 0;
 export const clients: SSEClient[] = [];
@@ -56,7 +56,7 @@ export const sendSseMessage = (event: string, data: any) => {
         disconnectedClients.push(client.id);
       }
     } catch (error) {
-      logger.error(`❌ Failed to send to client ${client.id}:`, error);
+      logger.error(`❌ Failed to send to client ${client.id}:`, error as any);
       disconnectedClients.push(client.id);
     }
   }
