@@ -5,7 +5,6 @@ import { useGetEmployees } from "@/features/employee/api/get-employees";
 import type { Params } from "@/types/api";
 import { useNavigate } from "@tanstack/react-router";
 import type { Employee } from "../../dto/employee";
-import { employeeDetailRoute } from "@/pages";
 
 type SortField = "name" | "position" | "age" | "salary" | "created_at";
 

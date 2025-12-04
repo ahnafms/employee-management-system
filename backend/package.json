@@ -8,10 +8,11 @@
   "main": "index.ts",
   "private": true,
   "scripts": {
-    "build": "tsc && tsup",
+    "build": "tsup",
     "start:dev": "node --import=tsx --watch src/index.ts",
     "start:prod": "node dist/index.js",
-    "start:worker": "tsx -r dotenv/config src/queue.ts",
+    "worker:dev": "tsx -r dotenv/config src/worker/index.ts",
+    "worker:prod": "node dist/worker/index.js",
     "check": "biome check --write",
     "test": "vitest run",
     "test:cov": "vitest run --coverage",

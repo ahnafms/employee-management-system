@@ -1,35 +1,51 @@
-# Base stage with pnpm setup
-FROM node:23.11.1-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-WORKDIR /app
+FROM node:20-alpine AS builder
 
-# Production dependencies stage
-FROM base AS prod-deps
-COPY package.json pnpm-lock.yaml ./
-# Install only production dependencies
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile --ignore-scripts
+WORKDIR /usr/src/app
 
-# Build stage - install all dependencies and build
-FROM base AS build
+RUN npm install -g pnpm
+
 COPY package.json pnpm-lock.yaml ./
-# Install all dependencies (including dev dependencies)
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --ignore-scripts
+
+RUN pnpm install
+
 COPY . .
+
 RUN pnpm run build
 
-# Final stage - combine production dependencies and build output
-FROM node:23.11.1-alpine AS runner
-WORKDIR /app
-COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/dist ./dist
+# Express API Service
+FROM node:20-alpine AS express
 
-# Use the node user from the image
-USER node
+WORKDIR /usr/src/app
 
-# Expose port 8080
-EXPOSE 8080
+# Install pnpm
+RUN npm install -g pnpm
 
-# Start the server
-CMD ["node", "dist/index.js"]
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --prod
+
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/.env ./.env
+
+ENV PORT 3000
+
+EXPOSE ${PORT}
+
+CMD ["pnpm", "run", "start:prod"]
+
+# Background Worker Service
+FROM node:20-alpine AS worker
+
+WORKDIR /usr/src/app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --prod
+
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/.env ./.env
+
+CMD ["pnpm", "run", "worker:prod"]
