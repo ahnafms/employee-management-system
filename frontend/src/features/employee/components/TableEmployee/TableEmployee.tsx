@@ -7,10 +7,6 @@ import { VirtualizedTable } from "./VirtualizedTable";
 import { TablePagination } from "./TablePagination";
 import { TableSearch } from "./TableSearch";
 import {
-  DialogEditEmployee,
-  type DialogEditEmployeeRef,
-} from "./DialogEditEmployee";
-import {
   DialogDeleteEmployee,
   type DialogDeleteEmployeeRef,
 } from "./DialogDeleteEmployee";
@@ -18,7 +14,6 @@ import type { Employee } from "@/features/employee/dto/employee";
 
 export function TableEmployee() {
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const editDialogRef = useRef<DialogEditEmployeeRef>(null);
   const deleteDialogRef = useRef<DialogDeleteEmployeeRef>(null);
 
   const {
@@ -36,10 +31,6 @@ export function TableEmployee() {
     handleRowClick,
   } = useTableEmployee();
 
-  const handleEditClick = (employee: Employee) => {
-    editDialogRef.current?.openDialog(employee);
-  };
-
   const handleDeleteClick = (employee: Employee) => {
     deleteDialogRef.current?.openDialog(employee);
   };
@@ -48,7 +39,6 @@ export function TableEmployee() {
     params,
     loadingIds: [],
     onSort: handleSort,
-    onEdit: handleEditClick,
     onDelete: handleDeleteClick,
   });
 
@@ -108,7 +98,6 @@ export function TableEmployee() {
         />
       )}
 
-      <DialogEditEmployee ref={editDialogRef} />
       <DialogDeleteEmployee ref={deleteDialogRef} />
     </div>
   );

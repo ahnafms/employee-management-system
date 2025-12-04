@@ -50,7 +50,7 @@ describe("FormLogin", () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText("Invalid email address")).toBeInTheDocument();
+      expect(screen.getByText(/Invalid email address/i)).toBeInTheDocument();
     });
   });
 
@@ -66,7 +66,7 @@ describe("FormLogin", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Password must be at least 6 characters")
+        screen.getByText(/Password must be at least 6 characters/i)
       ).toBeInTheDocument();
     });
   });
@@ -85,7 +85,7 @@ describe("FormLogin", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Password must be at least 6 characters")
+        screen.getByText(/Password must be at least 6 characters/i)
       ).toBeInTheDocument();
     });
   });

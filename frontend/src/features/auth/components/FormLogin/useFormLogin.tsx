@@ -40,7 +40,9 @@ export function useFormLogin({ onSuccess }: FormLoginProps) {
         setError(response.message || "Login failed");
       }
     } catch (err) {
-      setError(err?.message || "An error occurred during login");
+      const error =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      setError(error);
     } finally {
       setLoading(false);
     }
