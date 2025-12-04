@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createEmployee } from "@/features/employee/api/create-employee";
+import { useQueryClient } from "@tanstack/react-query";
 
 const employeeSchema = z.object({
   name: z
@@ -37,6 +38,8 @@ export function useFormCreateEmployee({ onSuccess }: FormCreateEmployeeProps) {
     message: string;
   } | null>(null);
 
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
@@ -52,8 +55,7 @@ export function useFormCreateEmployee({ onSuccess }: FormCreateEmployeeProps) {
       setIsSubmitting(true);
       setSubmitMessage(null);
 
-      const response = await createEmployee(data);
-      console.log("Employee created:", response);
+      await createEmployee(data);
 
       setSubmitMessage({
         type: "success",
@@ -64,6 +66,10 @@ export function useFormCreateEmployee({ onSuccess }: FormCreateEmployeeProps) {
       if (onSuccess) {
         setTimeout(() => {
           onSuccess();
+          queryClient.invalidateQueries({
+            queryKey: ["employees"],
+            exact: false,
+          });
         }, 1000);
       }
 

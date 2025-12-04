@@ -35,6 +35,10 @@ export function useFileUploader({ onSuccess }: UploadEmployeeCSVProps) {
         setUploadResult(null);
         setUploadProgress(null);
         onSuccess?.();
+        queryClient.invalidateQueries({
+          queryKey: ["employees"],
+          exact: false,
+        });
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -73,11 +77,6 @@ export function useFileUploader({ onSuccess }: UploadEmployeeCSVProps) {
       const result = await UploadEmployeeCSV(formData);
 
       setUploadResult(result);
-
-      queryClient.invalidateQueries({
-        queryKey: ["employees"],
-        exact: false,
-      });
     } catch (err) {
       const errorMessage = ApiError.isApiError(err)
         ? err.message
