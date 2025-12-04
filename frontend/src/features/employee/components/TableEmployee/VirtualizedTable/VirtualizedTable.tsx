@@ -12,11 +12,13 @@ import {
 interface VirtualizedTableProps {
   table: any;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  onRowClick?: (row: any) => void;
 }
 
 export function VirtualizedTable({
   table,
   containerRef,
+  onRowClick,
 }: VirtualizedTableProps) {
   const rowVirtualizer = useVirtualizer({
     count: table.getRowModel().rows.length,
@@ -69,7 +71,11 @@ export function VirtualizedTable({
           {virtualRows.map((virtualRow: any) => {
             const row = table.getRowModel().rows[virtualRow.index];
             return (
-              <TableRow className="bg-white" key={row.id}>
+              <TableRow
+                className="bg-white"
+                key={row.id}
+                onClick={() => onRowClick?.(row.original)} // <-- trigger callback
+              >
                 {row.getVisibleCells().map((cell: any) => (
                   <TableCell key={cell.id}>
                     {

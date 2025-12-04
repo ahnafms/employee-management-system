@@ -28,11 +28,12 @@ export function TableEmployee() {
     error,
     params,
     sorting,
+    searchInput,
     handleSearchChange,
     handleSort,
     handlePageChange,
     handlePageSizeChange,
-    searchInput,
+    handleRowClick,
   } = useTableEmployee();
 
   const handleEditClick = (employee: Employee) => {
@@ -87,7 +88,11 @@ export function TableEmployee() {
             No employees found
           </div>
         ) : (
-        <VirtualizedTable table={table} containerRef={tableContainerRef} />
+          <VirtualizedTable
+            table={table}
+            containerRef={tableContainerRef}
+            onRowClick={handleRowClick}
+          />
         )}
       </div>
 

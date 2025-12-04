@@ -5,7 +5,6 @@ export const LoginPage = () => {
   const navigate = useNavigate();
 
   const handleLoginSuccess = () => {
-    // Redirect to dashboard after successful login
     navigate({ to: "/home/dashboard" });
   };
 

@@ -3,6 +3,9 @@ import debounce from "lodash.debounce";
 import type { SortingState } from "@tanstack/react-table";
 import { useGetEmployees } from "@/features/employee/api/get-employees";
 import type { Params } from "@/types/api";
+import { useNavigate } from "@tanstack/react-router";
+import type { Employee } from "../../dto/employee";
+import { employeeDetailRoute } from "@/pages";
 
 type SortField = "name" | "position" | "age" | "salary" | "created_at";
 
@@ -22,8 +25,8 @@ export function useTableEmployee() {
 
   const employees = data?.data || [];
   const pagination = data?.pagination;
+  const navigate = useNavigate();
 
-  // Search handling
   const updateSearchParam = useCallback((query: string) => {
     setParams((prev) => ({
       ...prev,
@@ -86,24 +89,22 @@ export function useTableEmployee() {
     }));
   }, []);
 
+  const handleRowClick = (employee: Employee) => {
+    navigate({ to: `/home/employee/${employee.id}` });
+  };
+
   return {
-    // Data
     employees,
     pagination,
     isLoading,
     error,
     params,
     sorting,
-
-    // Search
     searchInput,
     handleSearchChange,
-
-    // Sort
     handleSort,
-
-    // Pagination
     handlePageChange,
     handlePageSizeChange,
+    handleRowClick,
   };
 }

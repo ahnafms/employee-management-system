@@ -24,7 +24,7 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 h-full p-4 flex flex-col">
       <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">
-        App Name
+        EMS APP
       </h2>
       <nav className="flex flex-col space-y-2">
         {navItems.map((item) => (

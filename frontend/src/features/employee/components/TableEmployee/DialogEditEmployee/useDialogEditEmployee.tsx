@@ -11,7 +11,13 @@ interface EditForm {
   salary: string;
 }
 
-export function useDialogEditEmployee() {
+interface UseDialogEditEmployeeProps {
+  onSuccess?: () => void;
+}
+
+export function useDialogEditEmployee({
+  onSuccess,
+}: UseDialogEditEmployeeProps) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -90,6 +96,7 @@ export function useDialogEditEmployee() {
         queryKey: ["employees"],
         exact: false,
       });
+      onSuccess?.();
 
       closeDialog();
       return {

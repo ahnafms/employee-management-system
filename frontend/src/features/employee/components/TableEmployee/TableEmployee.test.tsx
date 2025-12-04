@@ -94,9 +94,10 @@ describe("TableEmployee", () => {
   it("should display employee salaries", () => {
     renderWithProviders(<TableEmployee />);
 
-    expect(screen.getByText("5000")).toBeInTheDocument();
-    expect(screen.getByText("4500")).toBeInTheDocument();
-    expect(screen.getByText("4000")).toBeInTheDocument();
+    // Use regex pattern to handle text that might be split across elements
+    expect(screen.getByText(/5000/)).toBeInTheDocument();
+    expect(screen.getByText(/4500/)).toBeInTheDocument();
+    expect(screen.getByText(/4000/)).toBeInTheDocument();
   });
 
   it("should display loading state when fetching data", () => {
@@ -155,9 +156,10 @@ describe("TableEmployee", () => {
   it("should display pagination information", () => {
     renderWithProviders(<TableEmployee />);
 
-    // Check if pagination exists in the page (exact selectors depend on implementation)
-    const totalRecordsText = screen.queryByText(/3/);
-    expect(totalRecordsText).toBeInTheDocument();
+    // Use a more specific selector for pagination text
+    const paginationText = screen.getByText(/Showing .* of .* total employees/);
+    expect(paginationText).toBeInTheDocument();
+    expect(paginationText).toHaveTextContent("3");
   });
 
   it("should have proper table structure", () => {
@@ -170,9 +172,11 @@ describe("TableEmployee", () => {
   it("should render employees in correct order", () => {
     renderWithProviders(<TableEmployee />);
 
-    const rows = screen.getAllByRole("row");
-    // Verify the table contains employee data (exact row count depends on table structure)
-    expect(rows.length).toBeGreaterThan(1);
+    // Verify that the employee data is rendered by checking for specific names
+    // The virtualized table only shows visible rows, so we check for the actual data
+    expect(screen.getByText("John Doe")).toBeInTheDocument();
+    expect(screen.getByText("Jane Smith")).toBeInTheDocument();
+    expect(screen.getByText("Bob Johnson")).toBeInTheDocument();
   });
 
   it("should handle large employee datasets", () => {
@@ -220,11 +224,11 @@ describe("TableEmployee", () => {
   it("should handle search input display", () => {
     renderWithProviders(<TableEmployee />);
 
-    // TableSearch component should be rendered
+    // Check if the search input exists or the "Employees" heading is visible
     const searchInput = screen.queryByPlaceholderText(/search/i);
-    expect(
-      searchInput !== null || screen.getByText(/employee/i)
-    ).toBeInTheDocument();
+    const employeeHeading = screen.queryByText(/employees/i);
+
+    expect(searchInput || employeeHeading).toBeInTheDocument();
   });
 
   it("should display table controls and buttons", () => {

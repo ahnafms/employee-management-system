@@ -11,12 +11,12 @@ import DashboardPage from "./dashboard";
 import SettingsPage from "./settings";
 import { HomePageLayout } from "@/layouts/home-layout";
 import { isAuthenticated } from "@/features/auth/api/login";
+import DetailEmployeePage from "./detail-employee";
 
 // --- A. Define the Root Route ---
 const rootRoute = createRootRoute({
   component: () => (
     <>
-      {/* You might add a global header/footer here if needed */}
       <div id="app-content">
         <Outlet />
       </div>
@@ -30,7 +30,6 @@ const loginRoute = createRoute({
   path: "/login",
   component: LoginPage,
   beforeLoad: async () => {
-    // If already authenticated, redirect to dashboard
     const authenticated = await isAuthenticated();
     if (authenticated) {
       throw redirect({
@@ -45,7 +44,6 @@ const homeLayoutRoute = createRoute({
   path: "home",
   component: HomePageLayout,
 
-  // *** PROTECTION GUARD FOR ALL /home/* ROUTES ***
   beforeLoad: async ({ location }) => {
     const authenticated = await isAuthenticated();
     if (!authenticated) {
@@ -58,9 +56,7 @@ const homeLayoutRoute = createRoute({
     }
   },
 
-  // Handle route errors (e.g., 401 from API calls)
   errorComponent: ({ error }) => {
-    // If it's a 401 error, redirect to login
     if (
       error &&
       typeof error === "object" &&
@@ -72,12 +68,10 @@ const homeLayoutRoute = createRoute({
         replace: true,
       });
     }
-    // Otherwise, show error page
     return <div>Error loading dashboard: {String(error)}</div>;
   },
 });
 
-// --- D. Nested Protected Routes ---
 const dashboardRoute = createRoute({
   getParentRoute: () => homeLayoutRoute,
   path: "dashboard",
@@ -90,13 +84,18 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
-// --- E. Assemble the Route Tree ---
+export const employeeDetailRoute = createRoute({
+  getParentRoute: () => homeLayoutRoute,
+  path: "employee/$employeeId",
+  component: DetailEmployeePage,
+});
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
   homeLayoutRoute.addChildren([
+    employeeDetailRoute,
     dashboardRoute,
     settingsRoute,
-    // Add an index route to redirect /home to /home/dashboard
     createRoute({
       getParentRoute: () => homeLayoutRoute,
       path: "/",

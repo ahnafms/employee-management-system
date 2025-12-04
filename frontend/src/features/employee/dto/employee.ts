@@ -36,3 +36,7 @@ export type GetEmployeesResponse = {
   data: Employee[];
   pagination: Pagination;
 };
+
+export type GetEmployeeResponse = {
+  data: Employee;
+};

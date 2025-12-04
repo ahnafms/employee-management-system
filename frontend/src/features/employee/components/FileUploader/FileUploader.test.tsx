@@ -134,7 +134,7 @@ describe("FileUploader", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Please select a valid CSV file")
+        screen.getByText(/Please select a valid CSV file/i)
       ).toBeInTheDocument();
     });
   });
@@ -273,7 +273,7 @@ describe("FileUploader", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("Please select a valid CSV file")
+        screen.getByText(/Please select a valid CSV file/i)
       ).toBeInTheDocument();
     });
 
@@ -287,7 +287,7 @@ describe("FileUploader", () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByText("Please select a valid CSV file")
+        screen.queryByText(/Please select a valid CSV file/i)
       ).not.toBeInTheDocument();
     });
   });

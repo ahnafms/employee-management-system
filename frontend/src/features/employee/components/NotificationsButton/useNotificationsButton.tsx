@@ -5,6 +5,7 @@ import {
   useReadUnreadCount,
   useSetUploadProgress,
 } from "@/store/notifications";
+import { env } from "@/config/env";
 
 export function useNotificationsButton() {
   const [open, setOpen] = useState(false);
@@ -15,7 +16,7 @@ export function useNotificationsButton() {
   const sourceRef = useRef<EventSource | null>(null);
 
   useEffect(() => {
-    const url = `${window.location.protocol}//${window.location.hostname}:8080/notifications/employee`;
+    const url = `${env.baseUrl}/notifications/employee`;
     const source = new EventSource(url, { withCredentials: true });
     sourceRef.current = source;
 
@@ -43,7 +44,7 @@ export function useNotificationsButton() {
     source.addEventListener("create-employee", handleEvent as EventListener);
     source.addEventListener(
       "bulk-create-employee-progress",
-      handleEvent as EventListener
+      handleEvent as EventListener,
     );
 
     source.onerror = (err) => {

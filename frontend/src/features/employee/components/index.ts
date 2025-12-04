@@ -3,6 +3,7 @@ import { FormCreateEmployee } from "./TableEmployee/ButtonCreateEmployee/FormCre
 import { FileUploader } from "./FileUploader";
 import { TableEmployee } from "./TableEmployee/TableEmployee";
 import { NotificationsButton } from "./NotificationsButton";
+import { EmployeeDetail } from "./EmployeeDetail";
 
 export {
   ButtonCreateEmployee,
@@ -10,4 +11,5 @@ export {
   FileUploader,
   NotificationsButton,
   TableEmployee,
+  EmployeeDetail,
 };
